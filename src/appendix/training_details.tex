@@ -1,0 +1,20 @@
+\chapter{Training Details}
+
+All models are trained with 4 $\times$ NVIDIA A100 GPUS with a batch size of one, corresponding to an effective batch size of 4 as gradients are aggregated across GPUs. 
+All models were trained to condition on or generate 16 frames at a time, use an EMA rate of 0.999, and use the AdamW \cite{AdamW} optimizer. We use the noise schedules defined in Chen~\cite{noiseschedules}: \texttt{linear} for the Inpainting-Background model, \texttt{cosine} for Inpainting-Cars, and \texttt{sigmoid} for BDD-Inpainting and Traffic-Scenes. All models use temporal attention at the spatial resolutions (32, 16, 8) in the U-Net, except for the Inpainting-Cars model where temporal attention only occurs at resolutions (16, 8). Otherwise, the default hyperparameters from our training code are used for all models. This code, and the BDD-Inpainting checkpoint, will be released upon publication. The number of training iterations for each model is listed below:
+\begin{table}[]
+\centering
+\begin{tabular}{lc}
+\toprule
+Dataset               & Iterations (millions) \\ 
+\midrule
+BDD-Inpainting        & 2.5                   \\
+Inpainting-Cars       & 1.1                   \\
+Inpainting-Background & 1.5                   \\
+Traffic-Scenes        & 2.4                  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+

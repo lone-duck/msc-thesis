@@ -99,7 +99,9 @@
 \fi
 
 \RequirePackage{textcase}	% for lower- and upper-casing
-
+\RequirePackage[labelfont=bf,font=small,tableposition=bottom]{caption}
+\RequirePackage[skip=3pt]{subcaption}
+\RequirePackage[T1]{fontenc} 
 % tocbibind: cause list of figures, tables in the toc
 % GPS apparently now require the ToC to be itself listed in the ToC,
 % which seems redundant (why would you look for the ToC in the ToC?)

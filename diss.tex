@@ -1,4 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Template for a UBC-compliant dissertation
 % At the minimum, you will need to change the information found
 % after the "Document meta-data"
@@ -52,13 +51,13 @@
 %%
 
 %% NFSS font specification (New Font Selection Scheme)
-\usepackage{times,mathptmx,courier}
+%\usepackage{times}%,mathptmx,courier}
 \usepackage[scaled=.92]{helvet}
 
 %% Math or theory people may want to include the handy AMS macros
-%\usepackage{amssymb}
-%\usepackage{amsmath}
-%\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
 
 %% The pifont package provides access to the elements in the dingbat font.   
 %% Use \ding{##} for a particular dingbat (see p7 of psnfss2e.pdf)
@@ -163,7 +162,7 @@
 
 %% The caption package provides support for varying how table and
 %% figure captions are typeset.
-\usepackage[format=hang,indention=-1cm,labelfont={bf},margin=1em]{caption}
+%\usepackage[indention=-1cm,labelfont={bf},margin=1em]{caption}
 
 %% url: for typesetting URLs and smart(er) hyphenation.
 %% \url{http://...} 
@@ -315,36 +314,27 @@
 %% Document meta-data: be sure to also change the \hypersetup information
 %%
 
-\title{On the Use of the \texttt{ubcdiss} Template}
+\title{Semantically Consistent Video Inpainting with Conditional Diffusion Models}
 %\subtitle{If you want a subtitle}
 
-\author{Johnny Canuck}
-\previousdegree{B. Basket Weaving, University of Illustrious Arts, 1991}
-\previousdegree{M. Silly Walks, Another University, 1994}
+\author{Dylan Green}
+\previousdegree{B.A.Sc., University of British Columbia, 2021}
 
 % What is this dissertation for?
-\degreetitle{Doctor of Philosophy}
+\degreetitle{Master of Science}
 
 \institution{The University of British Columbia}
 \campus{Vancouver}
 
 \faculty{The Faculty of Graduate and Postdoctoral Studies}
-\department{Basket Weaving}
-\submissionmonth{April}
-\submissionyear{2192}
+\department{Computer Science}
+\submissionmonth{May}
+\submissionyear{2024}
 
 % details of your examining committee
-\examiningcommittee{John Smith, Professor, Materials Engineering, \textsc{UBC}}{Supervisor}
-\examiningcommittee{Mary Maker, Professor, Materials Engineering, \textsc{UBC}}%
-    {Supervisory Committee Member}
-\examiningcommittee{Nebulous Name, Position, Department, Institution}{Supervisory Committee Member}
-\examiningcommittee{Magnus Monolith, Position, Other Department, Institution}{Additional Examiner}
+\examiningcommittee{Frank Wood, Associate Professor, Computer Science, UBC}{Supervisor}
+\examiningcommittee{Mark Schmidt, Associate Professor, Computer Science, UBC}{Supervisor}
 
-% details of your supervisory committee
-\supervisorycommittee{Ira Crater, Professor, Materials Engineering, \textsc{UBC}}%
-    {Supervisory Committee Member}
-\supervisorycommittee{Adeline Long, \textsc{CEO} of Aerial Machine
-    Transportation, Inc.}{Supervisory Committee Member}
 
 %% hyperref package provides support for embedding meta-data in .PDF
 %% files
@@ -383,7 +373,7 @@
 \makecommitteepage
 
 %    3. Abstract (mandatory - maximum 350 words)
-\include{abstract}
+\include{src/abstract}
 \cleardoublepage
 
 %    4. Lay Summary (Effective May 2017, mandatory - maximum 150 words)
@@ -427,7 +417,11 @@
 \acresetall	% reset all acronyms used so far
 
 %    1. Introduction
-\include{intro}
+\include{src/intro}
+\include{src/related_work} 
+\include{src/method}
+\include{src/experiments}
+\include{src/conclusion}
 
 %    2. Main body
 % Generally recommended to put each chapter into a separate file
@@ -444,14 +438,14 @@
 \begin{singlespace}
 \raggedright
 \bibliographystyle{abbrvnat}
-\bibliography{biblio}
+\bibliography{egbib}
 \end{singlespace}
 
 \appendix
 %    6. Appendices (including copies of all required UBC Research
 %       Ethics Board's Certificates of Approval)
 %\include{reb-coa}	% pdfpages is useful here
-\include{appendix}
+\include{src/supplementary}
 
 \backmatter
 %    7. Index

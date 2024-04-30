@@ -1,0 +1,47 @@
+
+
+
+\begin{table}[t]
+\centering
+\caption{Quantitative comparison with state-of-the-art video inpainting methods across each of our four datasets. For each dataset/metric, the best performing model is indicated with bold font and the second best performing model is underlined. Improved AR w/ Far Future is used for all datasets but Inpainting-Background, which uses AR.}
+\label{table:main}
+\customrescaleone{
+
+\begin{tabular}{llllllll}
+\toprule
+Method & PSNR$\blacktriangle$ & SSIM$\blacktriangle$   & LPIPS$\blacktriangledown$     & PVCS$\blacktriangledown$   & FID$\blacktriangledown$   & VFID$\blacktriangledown$   & $E_\text{warp}$$\blacktriangledown$ \\ 
+\midrule
+\multicolumn{8}{c}{BDD-Inpainting} \\
+\midrule
+ProPainter                       & \hlk{\underline{32.65}}  & \hlk{\underline{0.968}} & \hlk{\underline{0.0355}} & \hlk{\underline{0.2806}} & \hlk{\underline{2.51}}  & \hlk{\underline{0.1599}} & \hlk{$\mathbf{\,1.5{\cdot}10^{\shortminus3}}$}            \\
+FGT                              & \hlk{28.50}  & \hlk{0.928} & \hlk{0.0843} & \hlk{0.6430} & \hlk{9.94}  & \hlk{0.7863} & \hlk{$\,4.0{\cdot}10^{\shortminus3}$}          \\
+E$^2$FGVI                        & \hlk{30.16}  & \hlk{0.946} & \hlk{0.0640} & \hlk{0.4765} & \hlk{6.58}  & \hlk{0.3665} & \hlk{$\,2.3{\cdot}10^{\shortminus3}$}            \\
+FGVC                             & \hlk{25.84}  & \hlk{0.884} & \hlk{0.1498} & \hlk{1.0210} & \hlk{32.08} & \hlk{1.7995} & \hlk{$\,7.5{\cdot}10^{\shortminus3}$}     \\
+Ours                             & \hlbf{33.68}	& \hlbf{0.972} & \hlbf{0.0261} & \hlbf{0.2037}	& \hlbf{1.71}  & \hlbf{0.0748} & \hlk{\,$\underline{1.8{\cdot}10^{\shortminus3}}$} \\
+\midrule
+\multicolumn{8}{c}{BDD-Inpainting-Blobs} \\
+\midrule
+ProPainter                       & \hlk{\underline{30.54}}  & \hlk{\underline{0.960}} & \hlk{\underline{0.0467}} & \hlk{\underline{0.3120}} & \hlk{\underline{2.56}}  & \hlk{\underline{0.1499}} & \hlk{$\mathbf{\,1.2{\cdot}10^{\shortminus3}}$}               \\
+FGT                              & \hlk{27.33}  & \hlk{0.938} & \hlk{0.0737} & \hlk{0.5130} & \hlk{9.41}  & \hlk{0.3594} & \hlk{$\,2.5{\cdot}10^{\shortminus3}$}            \\
+E$^2$FGVI                        & \hlk{29.04}  & \hlk{0.950} & \hlk{0.0667} & \hlk{0.4414} & \hlk{4.23}  & \hlk{0.2339} & \hlk{$\,1.7{\cdot}10^{\shortminus3}$}            \\
+FGVC                             & \hlk{25.10}  & \hlk{0.913} & \hlk{0.0980} & \hlk{0.6957} & \hlk{16.64} & \hlk{0.6184} & \hlk{$\,3.8{\cdot}10^{\shortminus3}$}            \\
+Ours                       & \hlbf{30.67}	& \hlbf{0.961} & \hlbf{0.0442} & \hlbf{0.2857}	& \hlbf{1.69}  & \hlbf{0.1083} & \hlk{$\,\underline{1.5{\cdot}10^{\shortminus3}}$}            \\
+\midrule
+\multicolumn{8}{c}{Inpainting-Background} \\
+\midrule
+ProPainter                   & \hlk{42.03}  & \hlk{\underline{0.994}} & \hlk{0.0145} & \hlk{0.0572} & \hlk{2.83}  & \hlk{\underline{0.0550}} & \hlk{$\mathbf{\,2.6{\cdot}10^{\shortminus4}}$}            \\
+FGT                          & \hlbf{44.23}  & \hlbf{0.996} & \hlbf{0.0081} & \hlbf{0.0371} & \hlbf{1.35}  & \hlbf{0.0462} & \hlk{$\,\underline{2.9{\cdot}10^{\shortminus4}}$}            \\
+E$^2$FGVI                    & \hlk{37.27}  & \hlk{0.985} & \hlk{0.0400} & \hlk{0.2074} & \hlk{6.71}  & \hlk{0.2600} & \hlk{$\,6.0{\cdot}10^{\shortminus4}$}            \\
+FGVC                         & \hlk{\underline{42.92}}  & \hlk{0.993} & \hlk{\underline{0.0117}} & \hlk{\underline{0.0557}} & \hlk{\underline{1.99}}  & \hlk{0.0742} & \hlk{$\,4.7{\cdot}10^{\shortminus4}$}            \\
+Ours                       & \hlk{38.99}	& \hlk{0.987} & \hlk{0.0273} & \hlk{0.1443}	& \hlk{6.11}  & \hlk{0.1455} & \hlk{$\,4.1{\cdot}10^{\shortminus4}$} \\
+\midrule
+\multicolumn{8}{c}{Traffic-Scenes} \\
+\midrule
+ProPainter                   & \hlk{\underline{31.98}}  & \hlk{\underline{0.967}} & \hlk{\underline{0.0326}} & \hlk{\underline{0.2909}} & \hlk{\underline{8.51}}  & \hlk{\underline{0.3482}} & \hlk{$\,\underline{2.5{\cdot}10^{\shortminus4}}$}            \\
+FGT                          & \hlk{31.97}  & \hlk{0.963} & \hlk{0.0397} & \hlk{0.3528} & \hlk{9.92}  & \hlk{0.5392} & \hlk{$\,3.6{\cdot}10^{\shortminus4}$}            \\
+E$^2$FGVI                    & \hlk{31.40}  & \hlk{0.957} & \hlk{0.0440} & \hlk{0.3809} & \hlk{13.13} & \hlk{0.6113} & \hlk{$\,4.1{\cdot}10^{\shortminus4}$}            \\
+FGVC                         & \hlk{29.11}  & \hlk{0.926} & \hlk{0.0794} & \hlk{0.5914} & \hlk{25.93} & \hlk{1.2358} & \hlk{$\,9.9{\cdot}10^{\shortminus4}$}            \\
+Ours                         & \hlbf{35.29}	& \hlbf{0.978} & \hlbf{0.0202} & \hlbf{0.1725}	& \hlbf{4.87}  & \hlbf{0.1637} & \hlk{$\mathbf{\,2.3{\cdot}10^{\shortminus4}}$}            \\
+\bottomrule
+\end{tabular}}
+\end{table}

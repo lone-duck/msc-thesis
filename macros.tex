@@ -19,12 +19,79 @@
 \newcommand{\etal}{\emph{et al}}
 
 % Some useful macros for typesetting terms.
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% The "axessiblity" package can be found at: https://ctan.org/pkg/axessibility?lang=en
+\usepackage[accsupp]{axessibility}  % Improves PDF readability for those with disabilities.
+
+%\usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{bbm}
+\usepackage{comment}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{mathtools}
 \newcommand{\file}[1]{\texttt{#1}}
 \newcommand{\class}[1]{\texttt{#1}}
 \newcommand{\latexpackage}[1]{\href{http://www.ctan.org/macros/latex/contrib/#1}{\texttt{#1}}}
 \newcommand{\latexmiscpackage}[1]{\href{http://www.ctan.org/macros/latex/contrib/misc/#1.sty}{\texttt{#1}}}
 \newcommand{\env}[1]{\texttt{#1}}
 \newcommand{\BibTeX}{Bib\TeX}
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\eqdef}{=\vcentcolon}
+\newcommand{\bV}{\mathbf{V}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bm}{\mathbf{m}}
+\newcommand{\bL}{\mathbf{L}}
+\newcommand{\bVl}{\bV^{\text{latent}}}
+\newcommand{\bVo}{\bV^{\text{obs}}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\fX}{\mathcal{X}}
+\newcommand{\fY}{\mathcal{Y}}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\newcommand{\hlr}[1]{\textcolor{red}{#1}}
+\newcommand{\hlb}[1]{\textcolor{blue}{#1}}
+\newcommand{\hlbf}[1]{\textbf{#1}}
+\newcommand{\hlo}[1]{\textcolor{orange}{#1}}
+\newcommand{\hlk}[1]{\textcolor{black}{#1}}
+\newcommand{\customrescale}[1]{\scalebox{.70}{\scriptsize #1}}
+\DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\newcommand{\customrescaleone}[1]{\scalebox{.90}{\scriptsize #1}}
+\definecolor{latentcolor}{rgb}{0.2,0.93,1.}
+\definecolor{observedpastcolor}{rgb}{0.39,0.,0.}
+\definecolor{observedfuturecolor}{rgb}{1.,0.,0.}
+\definecolor{completecolor}{rgb}{0.63,0.63,0.63}
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{eccvabbrv}[Common abbreviations for ECCV]
+
+\usepackage[capitalize]{cleveref}
+
+% Add a period to the end of an abbreviation unless there's one
+% already, then \xspace.
+\RequirePackage{xspace}
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+
+\def\eg{\emph{e.g}\onedot} 
+\def\Eg{\emph{E.g}\onedot}
+\def\ie{\emph{i.e}\onedot} 
+\def\Ie{\emph{I.e}\onedot}
+\def\cf{\emph{cf}\onedot} 
+\def\Cf{\emph{Cf}\onedot}
+\def\etc{\emph{etc}\onedot} 
+\def\vs{\emph{vs}\onedot}
+\def\wrt{w.r.t\onedot} 
+\def\dof{d.o.f\onedot}
+\def\iid{i.i.d\onedot} 
+\def\wolog{w.l.o.g\onedot}
+\def\etal{\emph{et al}\onedot}
+\makeatother
+
 
 % Define a command \doi{} to typeset a digital object identifier (DOI).
 % Note: if the following definition raise an error, then you likely
