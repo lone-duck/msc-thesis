@@ -11,4 +11,16 @@
 
 \chapter{Lay Summary}
 
-Video inpainting is the task of filling in missing pixels in a video with plausible values, with the goal that the inpainted result be indistinguishable from a real video. Existing approaches typically use machine learning to determine how the missing parts of each frame can be filled in by borrowing visual content from nearby frames. These methods implicitly assume that the visible parts of nearby frames contain all of the information necessary to inpaint the missing regions, and fail to produce compelling results when this assumption does not hold. 
+Video inpainting is the task of filling in missing pixels in a video with plausi-
+ble values, with the goal that the inpainted result be indistinguishable from a
+real video. Existing approaches typically use machine learning to determine
+how the missing parts of each frame can be filled in by borrowing visual con-
+tent from nearby frames. These methods implicitly assume that the visible
+parts of nearby frames contain sufficient information to inpaint the
+missing regions, and fail to produce compelling results when this assumption
+does not hold. In this thesis, we investigate the use of video diffusion models
+for video inpainting. Video diffusion models are a recently proposed class
+of machine learning models capable of generating long, photorealistic videos. We demonstrate that our approach avoids the failure
+modes of existing approaches, and is capable of using \emph{semantic} information
+from the context to generate plausible completions for partial videos.
+
