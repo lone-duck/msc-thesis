@@ -136,7 +136,7 @@ We then wish to approximately sample $\mathbf{x} \sim p_\text{data}(\cdot | \mat
 \end{equation}
 This means that we can sample from the required approximation of $p_\text{data}(\mathbf{x}|\mathbf{y})$ by sampling from $p_\theta(\mathbf{x},\mathbf{z}|\mathbf{y})$ and then simply discarding $\mathbf{z}$.
 
-\section{Sampling Schemes}
+\section{Sampling Schemes}\label{sec:samplingschemes}
 The ability to condition on incomplete frames enables us to design new sampling schemes that better capture dependencies that are necessary for high-quality video inpainting. \textbf{Improved AR} is a variant of AR that takes into account information from future frames by conditioning on the observed parts of the frames immediately after the sequence of frames being generated, as well as on the frames before; see \cref{fig:improved-ar}. \textbf{Improved AR w/ Far Future} builds on ``Improved AR'' by conditioning on the observed parts of frames far in the future instead of of frames immediately after those being sampled; see \cref{fig:improved-ar-w-far-future}.
 \textbf{3-Resolution Improved AR} (3-Res. Improved AR) builds on ``Improved AR'' by first infilling every fifteenth frame using Improved AR, then infilling every fifth frame while conditioning on nearby infilled frames, and then infilling all other frames. We visualize a ``2-res.'' version (infilling every third frame and then every frame) in \cref{fig:multiscale}. Visualizations of all sampling schemes considered in this work can be found in \cref{app:sampling-schemes}.
 
