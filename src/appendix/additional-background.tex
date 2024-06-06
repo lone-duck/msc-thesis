@@ -1,26 +1,6 @@
 \chapter{Diffusion Model Sampling Details}
-As alluded to in the main paper, we train a diffusion model that uses $\epsilon$-prediction to parameterize the score of a distribution over $\bx_t$ at each time $t$. This can be used to parameterize a stochastic differential equation (or ordinary differential equation) that morphs samples from a unit Gaussian into approximate samples from the conditional distribution of interest $p_\text{data}(\bx|\by)$~\cite{song2020score}. We use the Heun sampler proposed by \cite{karras2022elucidating} to integrate this SDE. Our hyperparameters are $\sigma_\text{max}=1000$, $\sigma_\text{min} = 0.002$, $\rho=7$, $S_\text{churn}=80$, $S_\text{max}=\infty$, $S_0=0$, and $S_\text{noise}=1$. We use 100 sampling steps (involving 199 network function evaluations) for each experiment except where specified otherwise. 
-
-% heun-80-inf-0-1-1000-0.002-7-100
+As alluded to in the main paper, we train a diffusion model that uses $\epsilon$-prediction to parameterize the score of a distribution over $\bx_t$ at each time $t$. This can be used to parameterize a stochastic differential equation (or ordinary differential equation) that morphs samples from a unit Gaussian into approximate samples from the conditional distribution of interest $p_\text{data}(\bx|\by)$ \citep{song2020score}. We use the Heun sampler proposed by \citet{karras2022elucidating} to integrate this SDE. Our hyperparameters are $\sigma_\text{max}=1000$, $\sigma_\text{min} = 0.002$, $\rho=7$, $S_\text{churn}=80$, $S_\text{max}=\infty$, $S_0=0$, and $S_\text{noise}=1$. We use 100 sampling steps (involving 199 network function evaluations) for each experiment except where specified otherwise. 
 
 
-% \subsubsection{Diffusion Models}
-% A diffusion model \cite{ddpm, sohldickstein} is comprised of two stochastic processes:  a forward (diffusion) process and a reverse (generative) process. Given a data distribution $q(\bx_0)$, the forward process, defined as
-% \begin{equation}
-% q (\bx_{0: T})=q(\bx_0) \prod_{t=1}^T q (\bx_t | \bx_{t-1} ), \quad q (\bx_t | \bx_{t-1} )=\mathcal{N} (\bx_t ; \sqrt{\alpha_t} \bx_{t-1}, (1-\alpha_t) \mathbf{I} ),
-% \end{equation}
-% gradually transforms this distribution into a prior distribution $q(\bx_T)$ through additive noise. Typically the noise schedule $\{\alpha_t\}_{t=1}^T$ is chosen such that $q(\bx_T) \approx \mathcal{N}(\mathbf{0},\mathbf{I})$. The reverse process, defined as 
-% \begin{equation}
-% p_\theta (\bx_{0: T} )=p (\bx_T ) \prod_{t=1}^T p_\theta (\bx_{t-1} | \bx_t ), \quad p_\theta (\bx_{t-1} | \bx_t )=\mathcal{N} (\bx_{t-1} ; \boldsymbol{\mu}_\theta (\bx_t, t ), \boldsymbol{\Sigma}_\theta (\bx_t, t ) )
-% \end{equation}
-% where $p(\bx_T) \defeq \mathcal{N}(\mathbf{0},\mathbf{I})$, is trained to match the joint distribution of the forward process by optimizing a variational lower bound. Here we adopt the reverse process parameterizations
-% \begin{equation}
-%     \boldsymbol{\mu}_\theta (\bx_t, t ) \defeq \frac{1}{\sqrt{\alpha_t}}\left(\mathbf{x}_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta (\mathbf{x}_t, t)\right), \quad \boldsymbol{\Sigma}_\theta (\bx_t, t ) \defeq (1-\alpha_t)\mathbf{I}
-% \end{equation}
-% and simplified objective
-% \begin{equation}
-%     \mathcal{L}_{\text {simple }}(\theta):=\mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}_0+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, t\right)\right\|^2\right]
-%     \label{eq:lsimple}
-% \end{equation}
-%  of Ho \etal~\cite{ddpm}, where $\bar{\alpha}_t:=\prod_{s=1}^t \alpha_s$, $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{I})$, and $\boldsymbol{\epsilon}_\theta$ is a neural network trained to predict the noise $\boldsymbol{\epsilon}$ added to $\bx$. 
-%  \subsubsection{Conditional Diffusion Models} This framework is easily extended to conditional generation tasks where we wish to model $p_\theta(\bx_0|\by)$ for some conditioning signal $\by$, \eg the unmasked regions of an image in the case of image inpainting \cite{palette}. The reverse process is modified to condition on $\by$ in the transition densities $p_\theta(\bx_{t-1}|\bx_t, \by)$, typically by including $\by$ as an input to the neural network: $\boldsymbol{\epsilon}_\theta(\bx_t, \by, t)$. The data distribution $q(\bx_0, \by)$ becomes a joint distribution over $(\bx_0, \by)$, and \cref{eq:lsimple} is modified accordingly.
+
+

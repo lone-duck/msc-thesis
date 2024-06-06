@@ -90,6 +90,8 @@
 
 \LoadClass[letterpaper]{book}
 \RequirePackage{setspace}
+\usepackage{geometry}
+\geometry{margin=1.25in}
 
 \ifb@l@nced
     \setlength{\oddsidemargin}{\paperwidth-\textwidth}%
