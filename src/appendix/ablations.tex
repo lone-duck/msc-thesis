@@ -1,6 +1,6 @@
 \chapter{Additional Ablations}
 \section{Additional Sampling Scheme Ablations}
-\Cref{table:samplingschemesnotblobs} and \Cref{table:samplingschemesblobs} show the effect of using different sampling schemes on the BDD-Inpainting and BDD-Inpainting-Blobs test sets, respectively. The sampling schemes tested are depicted in \cref{fig:old-sampling-schemes} and \cref{fig:sampling-schemes}. For each metric, the best performing sampling scheme is indicated in bold font. All measurements were taken using the Heun sampler \citep{karras2022elucidating} with 100 sampling steps. The Improved AR w/ Far Future performs best on both test sets across almost all metrics. Sampling scheme ablations are omitted for Inpainting-Background and Inpainting-Cars as we found an autoregressive scheme gave significantly better qualitative results than the other schemes.
+\Cref{table:samplingschemesnotblobs} and \Cref{table:samplingschemesblobs} show the effect of using different sampling schemes on the BDD-Inpainting and BDD-Inpainting-Blobs test sets, respectively. The sampling schemes tested are depicted in \Cref{fig:old-sampling-schemes} and \Cref{fig:sampling-schemes}. For each metric, the best performing sampling scheme is indicated in bold font. All measurements were taken using the Heun sampler \citep{karras2022elucidating} with 100 sampling steps. The Improved AR w/ Far Future performs best on both test sets across almost all metrics. Sampling scheme ablations are omitted for Inpainting-Background and Inpainting-Cars as we found an autoregressive scheme gave significantly better qualitative results than the other schemes.
 \begin{table}[h]
 \centering
 \caption{Effect of sampling schemes measured on the BDD-Inpainting test set.}
@@ -45,10 +45,10 @@ In this section we highlight the qualitative impact that different sampling sche
     \centering
     \captionsetup{type=figure}
     \includegraphics[width=\linewidth]{figures/james_quall/james_quall_beginning.pdf}
-    \caption{Qualitative results from different sampling schemes on the beginning of the video discussed in \cref{sec:quall}}
+    \caption{Qualitative results from different sampling schemes on the beginning of the video discussed in \Cref{sec:quall}}
     \label{fig:qual-begin}
     \includegraphics[width=\linewidth]{figures/james_quall/james_quall_end.pdf}
-    \caption{Qualitative results from different sampling schemes on the end of the video discussed in \cref{sec:quall}}
+    \caption{Qualitative results from different sampling schemes on the end of the video discussed in \Cref{sec:quall}}
     \label{fig:qual-end}
 \end{center}
 \end{figure*}
