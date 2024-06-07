@@ -27,17 +27,50 @@ Recall that we wish to train a model that can generate plausible values for unkn
 The distribution over masks $\bM$ can be understood as reflecting the variability in the types of masks we will encounter at test-time, and the frame index distribution can be understood as reflecting our desire to be able to sample from the model using arbitrary sampling schemes. Given $\bM$, $\fX$, and $\fY$, we create a combined list of frames $\fX \oplus \fY$, where $\oplus$ denotes concatenation, and a corresponding mask $\bM_{\fX,\fY} := \bM[\fX] \oplus \mathbbm{1}[\fY]$, where $\mathbbm{1}[\mathcal{Y}]$ is a mask of all $1$'s for each frame indexed in $\mathcal{Y}$. This masks only the missing pixels in frames $\fX$ while treating all pixels in frames $\fY$ as observed (visualized in \Cref{fig:arch-and-training}).
 We then extract our training targets from the video as $\bx := \bV[\fX\oplus\fY] \odot (1-\bM_{\fX,\fY})$, and our observations as $\by := \bV[\fX\oplus\fY] \odot \bM_{\fX,\fY}$.
 
+\begin{algorithm}[t]
+    \caption{Training Loop}
+    \label{alg:train}
+    \begin{algorithmic}[1]
+    \Repeat
+    \State $(\bV, \bM) \sim q(\bV, \bM)$\Comment{Sample video and mask}
+    \State $(\mathcal{X}, \mathcal{Y}) \sim u(\mathcal{X}, \mathcal{Y})$\Comment{Sample training task}
+    \State $t \sim \mathcal{U}(\{1 \ldots T\})$\Comment{Sample timestep}
+    \State $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$\Comment{Sample noise}
+    \State $\bM_{\mathcal{X}, \mathcal{Y}} \gets \bM [\mathcal{X}] \oplus \mathbbm{1}[\fY]$\Comment{Create training mask}
+    \State $\bx \gets \bV[\fX \oplus \fY] \odot (\mathbf{1} - \bM_{\fX, \fY})$\Comment{Extract noised pixels} 
+    \State $\by \gets \bV[\fX \oplus \fY] \odot \bM_{\fX, \fY}$\Comment{Extract known pixels} 
+    \State Compute $\mathcal{L}_{\text{ours}}(\theta)$ and take gradient descent step\Comment{See \Cref{eq:lours}}
+    \Until converged
+\end{algorithmic}
+\end{algorithm}
+
 Resampling $\bV$, $\bM$, $\fX$, and $\fY$ for every training example therefore defines a distribution over $\bx$ and $\by$, which we use when estimating the expectation over them in \Cref{eq:lflexible}. Combining this method of sampling $\bx$ and $\by$ with our pixel-wise mask, we write the loss as
 \begin{equation}
-    \mathcal{L}_{\text{ours}}(\theta):=\mathbb{E}_{t, \mathbf{x}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, \bM_{\fX,\fY}, \fX\oplus\fY, t\right)\right\|^2\right],
+    \mathcal{L}_{\text{ours}}(\theta):=\mathbb{E}_{t, \mathbf{x}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, \boldsymbol{\epsilon}}\left[(\mathbf{1}-\bM_{\fX,\fY})\odot\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, \bM_{\fX,\fY}, \fX\oplus\fY, t\right)\right\|^2\right],
     \label{eq:lours}
 \end{equation}
-where $\fX\oplus\fY$ provides information about each frame's index within $\bV$, and $\bM_{\fX,\fY}$ is the mask making explicit which pixels have known values.
+where $\fX\oplus\fY$ provides information about each frame's index within $\bV$, and $\bM_{\fX,\fY}$ is the mask making explicit which pixels have known values.We note that the loss is only computed for unknown pixel locations. The full training loop is outlined in \Cref{alg:train}.
 
 
 
 
-\begin{figure}[t!]
+\section{Inpainting Long Videos} \label{sec:future-conditioning}
+Given the architecture and training procedure we have described so far, we can use the resulting models to to implement the AR and Hierarchy-2 sampling schemes shown in \Cref{fig:ar,fig:h2} without further complication. A downside of these sampling schemes, however, is that they do not enable us to condition on frames with unknown pixel values. That is, we are not able to condition on the known pixels in a frame unless we either (a) have previously inpainted it and know all of its pixel values already, or (b) are inpainting it as we condition on it. We show in our experiments that this often leaves us unable to account for important dependencies in the context.
+
+
+
+We therefore propose a method for conditioning on \textit{incomplete} frames. This enables the sampling schemes shown in \Cref{fig:sampling-schemes}, where we condition on the known pixels in incomplete frames, marked in \textcolor{observedfuturecolor}{red}. Recall that $\bx$ denotes ``unknown pixels in frames indexed by $\fX$'' and $\by$ denotes ``known pixels in frames indexed by $\fX$ or $\fY$''. If any frames indexed by $\fY$ are incomplete then we have a third category, which we'll call $\mathbf{z}$: ``unknown pixels in frames indexed by $\fY$''.
+
+
+
+
+We then wish to approximately sample $\mathbf{x} \sim p_\text{data}(\cdot | \mathbf{y})$ without requiring values of $\mathbf{z}$. We do not have a way to sample directly from an approximation of this distribution, as the diffusion model is not trained to condition on ``incomplete'' frames. We note, however, that this desired distribution is the marginal of a distribution that our diffusion model \textit{can} approximate:
+\begin{equation}
+    p_\text{data}(\mathbf{x}|\mathbf{y}) = \int p_\text{data}(\mathbf{x},\mathbf{z}|\mathbf{y}) \mathrm{d}\mathbf{z} \approx \int p_\theta(\mathbf{x},\mathbf{z}|\mathbf{y}) \mathrm{d}\mathbf{z}.
+\end{equation}
+This means that we can sample from the required approximation of $p_\text{data}(\mathbf{x}|\mathbf{y})$ by sampling from $p_\theta(\mathbf{x},\mathbf{z}|\mathbf{y})$ and then simply discarding $\mathbf{z}$.
+
+\begin{figure}[t]
     \centering
     \begin{subfigure}[t]{0.3\textwidth}
         \centering
@@ -64,25 +97,9 @@ where $\fX\oplus\fY$ provides information about each frame's index within $\bV$,
     \label{fig:sampling-schemes}
 \end{figure}
 
-\section{Inpainting Long Videos} \label{sec:future-conditioning}
-Given the architecture and training procedure we have described so far, we can use the resulting models to to implement the AR and Hierarchy-2 sampling schemes shown in \Cref{fig:ar,fig:h2} without further complication. A downside of these sampling schemes, however, is that they do not enable us to condition on frames with unknown pixel values. That is, we are not able to condition on the known pixels in a frame unless we either (a) have previously inpainted it and know all of its pixel values already, or (b) are inpainting it as we condition on it. We show in our experiments that this often leaves us unable to account for important dependencies in the context.
-
-
-
-We therefore propose a method for conditioning on \textit{incomplete} frames. This enables the sampling schemes shown in \Cref{fig:sampling-schemes}, where we condition on the known pixels in incomplete frames, marked in \textcolor{observedfuturecolor}{red}. Recall that $\bx$ denotes ``unknown pixels in frames indexed by $\fX$'' and $\by$ denotes ``known pixels in frames indexed by $\fX$ or $\fY$''. If any frames indexed by $\fY$ are incomplete then we have a third category, which we'll call $\mathbf{z}$: ``unknown pixels in frames indexed by $\fY$''.
-
-
-We then wish to approximately sample $\mathbf{x} \sim p_\text{data}(\cdot | \mathbf{y})$ without requiring values of $\mathbf{z}$. We do not have a way to sample directly from an approximation of this distribution, as the diffusion model is not trained to condition on ``incomplete'' frames. We note, however, that this desired distribution is the marginal of a distribution that our diffusion model \textit{can} approximate:
-\begin{equation}
-    p_\text{data}(\mathbf{x}|\mathbf{y}) = \int p_\text{data}(\mathbf{x},\mathbf{z}|\mathbf{y}) \mathrm{d}\mathbf{z} \approx \int p_\theta(\mathbf{x},\mathbf{z}|\mathbf{y}) \mathrm{d}\mathbf{z}.
-\end{equation}
-This means that we can sample from the required approximation of $p_\text{data}(\mathbf{x}|\mathbf{y})$ by sampling from $p_\theta(\mathbf{x},\mathbf{z}|\mathbf{y})$ and then simply discarding $\mathbf{z}$.
-
 \section{Sampling Schemes}\label{sec:samplingschemes}
 The ability to condition on incomplete frames enables us to design new sampling schemes that better capture dependencies that are necessary for high-quality video inpainting. \textbf{Improved AR} is a variant of AR that takes into account information from future frames by conditioning on the observed parts of the frames immediately after the sequence of frames being generated, as well as on the frames before; see \Cref{fig:improved-ar}. \textbf{Improved AR w/ Far Future} builds on ``Improved AR'' by conditioning on the observed parts of frames far in the future instead of of frames immediately after those being sampled; see \Cref{fig:improved-ar-w-far-future}.
 \textbf{3-Resolution Improved AR} (3-Res. Improved AR) builds on ``Improved AR'' by first infilling every fifteenth frame using Improved AR, then infilling every fifth frame while conditioning on nearby infilled frames, and then infilling all other frames. We visualize a ``2-res.'' version (infilling every third frame and then every frame) in \Cref{fig:multiscale}. Visualizations of all sampling schemes we consider are shown in \Cref{fig:sampling-scheme-details}. 
-
-To highlight the qualitative impact that different sampling schemes can have on the quality of inpainted videos, we select a video from the BDD-Inpainting test set where conditioning on the appropriate frames is crucial for our method to succeed. \Cref{fig:qual-begin} shows the beginning of this video, where a car is occluded in the right-hand lane for the first few seconds of the video (see input frames in the first row). The Autoregressive (AR) scheme (second row) shows a distinct ``pop-in'' effect, as when the initial frames were generated the model was not able to condition on future frames where the cars existence and appearance are revealed. Both Reverse-AR and AR w/ Far Future (third and fourth rows) do condition on future frames that contain the car; Reverse-AR because the model is able to propagate the car backwards through time, and AR w/ Far Future because the model conditions on frames far out into the future where the car has been revealed. \Cref{fig:qual-end} shows the end of the video, where the cars in the right-hand lane are occluded and remain occluded for the rest of the video (first row). The AR scheme keeps these cars visible, as it is able to propagate them forward through time (second row). Reverse-Autoreg (third row) fails for the same reason that Autoreg did at the beginning: when the final frames were generated, the model was not able to condition on frames where the vehicles were visible. AR w/ Far Future (fourth row) is again successful; despite the cars not becoming visble again (and thus there is no ``future'' to condition on), it is able to propagate the cars forward in time as the Autoreg scheme does. 
 
 \begin{figure}[t!]
     \centering
@@ -137,20 +154,6 @@ To highlight the qualitative impact that different sampling schemes can have on 
     }
     \label{fig:sampling-scheme-details}
 \end{figure}
-
-
-\begin{figure*}[h!]
-\begin{center}
-    \centering
-    \captionsetup{type=figure}
-    \includegraphics[width=\linewidth]{figures/james_quall/james_quall_beginning.pdf}
-    \caption{Qualitative results from different sampling schemes on the beginning of the video discussed in \Cref{sec:samplingschemes}}
-    \label{fig:qual-begin}
-    \includegraphics[width=\linewidth]{figures/james_quall/james_quall_end.pdf}
-    \caption{Qualitative results from different sampling schemes on the end of the video discussed in \Cref{sec:samplingschemes}}
-    \label{fig:qual-end}
-\end{center}
-\end{figure*}
 
 \begin{comment}
 \begin{minipage}{0.46\textwidth}

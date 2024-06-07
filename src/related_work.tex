@@ -29,7 +29,7 @@ and simplified objective
     \mathcal{L}_{\text {simple }}(\theta):=\mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}_0+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, t\right)\right\|^2\right]
     \label{eq:lsimple-ddpm}
 \end{equation}
- of \citet{ddpm}, where $\bar{\alpha}_t:=\prod_{s=1}^t \alpha_s$, $\mathbf{x}_0 \sim q(\bx_0)$, $t \sim \text{Unif}(\{1, \ldots, T\})$,  $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{I})$, and $\boldsymbol{\epsilon}_\theta$ is a neural network trained to predict the noise $\boldsymbol{\epsilon}$ added to $\bx$ conditioned on $t$.
+ of \citet{ddpm}, where $\bar{\alpha}_t:=\prod_{s=1}^t \alpha_s$, $\mathbf{x}_0 \sim q(\bx_0)$, $t \sim \text{Unif}(\{1, \ldots, T\})$,  $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{I})$, and $\boldsymbol{\epsilon}_\theta$ is a neural network trained to predict the noise $\boldsymbol{\epsilon}$ added to $\bx$, conditioned on $t$.
 \subsection{Conditional Diffusion Models}
 This framework is easily extended to conditional generation tasks where we wish to model $p(\bx_0|\by)$ for some conditioning signal $\by$, for instance the unmasked regions of an image in the case of image inpainting \citep{palette}. The reverse process is modified to condition on $\by$ in the transition densities $p_\theta(\bx_{t-1}|\bx_t, \by)$, typically by including $\by$ as an input to the neural network: $\boldsymbol{\epsilon}_\theta(\bx_t, \by, t)$. The data distribution becomes a joint distribution $q(\bx_0, \by)$, and \Cref{eq:lsimple-ddpm} is modified accordingly:		
 \begin{equation}
@@ -37,6 +37,31 @@ This framework is easily extended to conditional generation tasks where we wish 
     \label{eq:lcond}
 \end{equation}
 Once such the network has been trained, various methods exist for using it to draw approximate samples from $p(\mathbf{x}_0|\mathbf{y})$ \citep{ddpm,sohldickstein,tashiro2021csdi,song2020score,karras2022elucidating}. We use the Heun sampler proposed by \citet{karras2022elucidating}, and leave further details to the appendix.
+
+
+
+
+\subsection{Video Diffusion Models}
+Before we discuss conditional video diffusion models, we first discuss video diffusion models in general. A number of recent papers have proposed diffusion-based approaches to generative modeling of video data \citep{didrik, fdm, vdm, yang2022diffusion, voleti2022MCVD}. 
+We follow the majority of these approaches \citep{fdm,vdm,voleti2022MCVD} in using a 4-D U-Net~\citep{unet} architecture to parameterize $\boldsymbol{\epsilon}_\theta(\ldots)$. 
+Alternating spatial and temporal attention blocks within the U-Net capture dependencies within and across frames respectively, with relative positional encodings \citep{rpe1, rpe2} providing information about each frame's position within the video. 
+Due to computational constraints, video diffusion models are inherently limited to conditioning on and generating a small number of frames at a time, which we denote as $K$. 
+
+\subsection{Flexible Video Diffusion Models}
+Generating long videos with numbers of frames $N \gg K$ then requires sampling from the diffusion model multiple times. A typical approach would be to break the generation down into multiple stages, and in each stage sample $K/2$ frames conditioned on the previous $K/2$ frames. 
+We depict this approach in \Cref{fig:ar}, with each row representing one stage. A problem with this strategy is that it fails to capture dependencies on frames more than $K/2$ frames in the past. 
+Alternative orders in which to generate frames (which we will refer to as ``sampling schemes'') are possible, with some additional ones depicted in \Cref{fig:h2,fig:rev_ar}. Each of these sampling schemes tends to have its downsides, and experimentation usually requires expensive retraining of models. 
+\citet{fdm} therefore suggest training a single model that can perform well on any sampling scheme. In particular, they train a model to generate any subset of video frames conditioned on any other subset with the objective
+\begin{equation}
+    \mathcal{L}_{\text {flexible}}(\theta):=\mathbb{E}_{t, \mathbf{x}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, t\right)\right\|^2\right],
+    \label{eq:lflexible}
+\end{equation}
+in which $\mathbf{x}$ are the frames to remove noise from at indices $\mathcal{X}$, and $\mathbf{y}$ are the frames to condition on at indices $\mathcal{Y}$. 
+To sample $\mathbf{x}$ and $\mathbf{y}$ we first sample $\mathcal{X}$ and $\mathcal{Y}$, then sample a training video, and then extract the frames at indices $\mathcal{X}$ and $\mathcal{Y}$ to form $\mathbf{x}$ and $\mathbf{y}$, respectively.
+Both the number of frames to generate and the number to condition on can vary, so the shapes of $\mathbf{x}$, $\boldsymbol{\epsilon}$, and $\mathbf{y}$ can vary correspondingly. The network is given the indices of all frames ($\mathcal{X}$ and $\mathcal{Y}$), as they are used to create the relative positional encodings \citep{rpe1, rpe2}. 
+Once a network is trained to make predictions for arbitrary indices $\mathcal{X}$ given arbitrary indices $\mathcal{Y}$, it can be used to sample long videos with any desired sampling scheme. Sampling schemes will henceforth be denoted as $\{\mathcal{X}_s, \mathcal{Y}_s\}_{s=1}^S$ where $S$ is the number of sampling stages and, at stage $s$, $\mathcal{X}_s$ and $\mathcal{Y}_s$ are the indices of the latent and observed frames, respectively. 
+
+
 
 \begin{figure}[t]
     \centering
@@ -64,31 +89,6 @@ Once such the network has been trained, various methods exist for using it to dr
     }
     \label{fig:old-sampling-schemes}
 \end{figure}
-
-
-\subsection{Video Diffusion Models}
-Before we discuss conditional video diffusion models, we first discuss video diffusion models in general. A number of recent papers have proposed diffusion-based approaches to generative modeling of video data \citep{didrik, fdm, vdm, yang2022diffusion, voleti2022MCVD}. 
-We follow the majority of these approaches \citep{fdm,vdm,voleti2022MCVD} in using a 4-D U-Net~\citep{unet} architecture to parameterize $\boldsymbol{\epsilon}_\theta(\ldots)$. 
-Alternating spatial and temporal attention blocks within the U-Net capture dependencies within and across frames respectively, with relative positional encodings \citep{rpe1, rpe2} providing information about each frame's position within the video. 
-Due to computational constraints, video diffusion models are inherently limited to conditioning on and generating a small number of frames at a time, which we denote as $K$. 
-
-\subsection{Flexible Video Diffusion Models}
-Generating long videos with numbers of frames $N \gg K$ then requires sampling from the diffusion model multiple times. A typical approach would be to break the generation down into multiple stages, and in each stage sample $K/2$ frames conditioned on the previous $K/2$ frames. 
-We depict this approach in \Cref{fig:ar}, with each row representing one stage. A problem with this strategy is that it fails to capture dependencies on frames more than $K/2$ frames in the past. 
-Alternative orders in which to generate frames (which we will refer to as ``sampling schemes'') are possible, with some additional ones depicted in \Cref{fig:h2,fig:rev_ar}. Each of these sampling schemes tends to have its downsides, and experimentation usually requires expensive retraining of models. 
-\citet{fdm} therefore suggest training a single model that can perform well on any sampling scheme. In particular, they train a model to generate any subset of video frames conditioned on any other subset with the objective
-\begin{equation}
-    \mathcal{L}_{\text {flexible}}(\theta):=\mathbb{E}_{t, \mathbf{x}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, \mathcal{X}, \mathcal{Y}, t\right)\right\|^2\right],
-    \label{eq:lflexible}
-\end{equation}
-in which $\mathbf{x}$ are the frames to remove noise from at indices $\mathcal{X}$, and $\mathbf{y}$ are the frames to condition on at indices $\mathcal{Y}$. 
-To sample $\mathbf{x}$ and $\mathbf{y}$ we first sample $\mathcal{X}$ and $\mathcal{Y}$, then sample a training video, and then extract the frames at indices $\mathcal{X}$ and $\mathcal{Y}$ to form $\mathbf{x}$ and $\mathbf{y}$, respectively.
-Both the number of frames to generate and the number to condition on can vary, so the shapes of $\mathbf{x}$, $\boldsymbol{\epsilon}$, and $\mathbf{y}$ can vary correspondingly. The network is given the indices of all frames ($\mathcal{X}$ and $\mathcal{Y}$), as they are used to create the relative positional encodings \citep{rpe1, rpe2}. 
-Once a network is trained to make predictions for arbitrary indices $\mathcal{X}$ given arbitrary indices $\mathcal{Y}$, it can be used to sample long videos with any desired sampling scheme. Sampling schemes will henceforth be denoted as $\{\mathcal{X}_s, \mathcal{Y}_s\}_{s=1}^S$ where $S$ is the number of sampling stages and, at stage $s$, $\mathcal{X}_s$ and $\mathcal{Y}_s$ are the indices of the latent and observed frames, respectively. 
-
-
-
-
 
 
 

@@ -2,22 +2,10 @@
 \section{Datasets}
 To highlight the unique capabilities our generative approach offers, we wish to target video inpainting tasks in which visual information in nearby frames cannot be easily exploited to achieve a convincing result. The YouTube-VOS \citep{youtubevos1} (training and test) and DAVIS \citep{davis} (test) video object segmentation datasets have become the \emph{de facto} standard benchmark datasets for video inpainting in recent years, and the foreground object masks included in these datasets have led to a heavy focus on object removal tasks in qualitative evaluations of video inpainting methods. Object removal in these datasets is a task to which, for instance, optical flow-based approaches are specifically well suited, as the backgrounds are often near-stationary and so information in neighboring frames can be used to great effect. In contrast, we wish to focus on tasks where inpainting requires the visual appearances of objects to be hallucinated in whole or in part and realistically propagated through time, or where the behavior of occluded objects must be inferred. We propose four new large-scale video inpainting datasets targeting such tasks. All datasets are 256 $\times$ 256 resolution and 10 fps. Details of how each dataset was constructed, are included in \Cref{app:datasetss}.
 %Additionally, the YouTube-VOS training set is problematic for training with our generative approach, as the videos are semantically diverse and the scale of the dataset is small \hlk{(3471 videos containing $\sim$200 frames each)} relative to datasets typically used to train video generative models.
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/13269_shaded_cropped.pdf}
-\caption[Inpaintings from our model and ProPainter on the task introduced in \Cref{fig:semantics} from our Traffic-Scenes dataset.]{Inpaintings from our model and ProPainter on the task introduced in \Cref{fig:semantics} from our Traffic-Scenes dataset. Our model can inpaint a realistic trajectory for the occluded vehicle. Competing flow-based approaches correctly inpaint the background but are unable to account for the vehicle.}
-\label{fig:traffic-scenes}
-\end{figure*}
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/bg_3119.pdf}
-\caption[A comparison of inpaintings from our method and FGT on a video from our Inpainting-Background dataset.]{Inpainted videos from our Inpainting-Background dataset. Results from our method are displayed on the top row; results from the best competing model FGT \citep{fgt} are on the bottom row. The ground truth region is darkened slightly to aid in visualizing the boundary between generated and ground-truth regions. Despite FGT outperforming our method on quantitative metrics, qualitative results are similar in quality.}
-\label{fig:background}
-\end{figure*}
 \subsection{BDD-Inpainting}
 We adapt the BDD100K \citep{bdd100k} dataset for the video inpainting task. This dataset contains 100,000 high-quality first-person driving videos and includes a diversity of geographic locations and weather conditions. We select a random subset of approximately 50,000 
 of these, and generate a set of both moving and stationary masks of four types: grids, horizontal or vertical lines, boxes (\Cref{fig:traffic-scenes}), and blobs (\Cref{fig:fig1}). During training both videos and masks are sampled uniformly, giving a distribution over an extremely varied set of inpainting tasks. We include two test sets of 100 video-mask pairs each, the first (BDD-Inpainting) containing only grid, line, and box masks, and the second (BDD-Inpainting-Blobs) containing only blob masks. The second is a substantially more challenging test set, as the masks are often large and occlude objects in the scene for a significant period of time. See \Cref{fig:bdd-examples} for representative examples; mask types, shown in green, are indicated for each. The test sets we use, along with code for processing the original BDD100K dataset and generating masks, will be released upon publication. 
-\begin{figure}[t]
+\begin{figure}
     \begin{center}
         \centering
         \captionsetup{type=figure}
@@ -28,7 +16,7 @@ of these, and generate a set of both moving and stationary masks of four types: 
     \end{figure}
 \subsection{Inpainting-Cars and Inpainting-Background}
 We use an in-house dataset of overhead drone footage of vehicle traffic, for which we have tracker-generated bounding boxes for each vehicle, to create two task-specific datasets. The first, Inpainting-Background (\Cref{fig:background}), targets the removal of cars from videos by using time-shifted bounding boxes as occlusion masks, where the bounding boxes are shifted such that the masked-out region contains only the road surface and other environmental factors. The second, Inpainting-Cars (\Cref{fig:cars}), targets the \emph{addition} of cars to videos by using the original bounding boxes as masks so that the masked-out region always contains a single vehicle. Note that the masked-out vehicle is not visible at any time in the context, and so,  given an input, the model must hallucinate a vehicle and propagate it through time, using only the size and movement of the mask as clues to plausible vehicle appearance and motion. See See \Cref{fig:cars-examples} and \Cref{fig:bg-examples} for examples from the Inpainting-Cars and Inpainting-Background datasets, respectively; masks are shown in black.
-\begin{figure}[t]
+\begin{figure}
     \begin{center}
         \centering
         \captionsetup{type=figure}
@@ -37,7 +25,7 @@ We use an in-house dataset of overhead drone footage of vehicle traffic, for whi
         \label{fig:cars-examples}
     \end{center}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
     \begin{center}
         \centering
         \captionsetup{type=figure}
@@ -48,7 +36,7 @@ We use an in-house dataset of overhead drone footage of vehicle traffic, for whi
 \end{figure}
 \subsection{Traffic Scenes}
 Using the same in-house dataset as referenced above, we generate another dataset where large sections of the roadway are occluded, requiring the model to infer vehicle behavior in the masked-out region. Crops are centered over road features like intersections, roundabouts, highway on-ramps, \etc where complex vehicle behavior and interactions take place. This dataset contains exceptionally challenging video inpainting tasks as vehicles are often occluded for long durations of time, requiring the model to generate plausible trajectories that are semantically consistent with both the observations (e.g. the entry and exit point of a vehicle from the masked region) and the roadway. This dataset contains approximately 13,000 videos in the training set and 100 video-mask pairs in the test set. See \Cref{fig:ts-examples} for representative examples; mask types, shown in green, are indicated for each example.
-\begin{figure}[t]
+\begin{figure}
     \begin{center}
         \centering
         \captionsetup{type=figure}
@@ -57,6 +45,13 @@ Using the same in-house dataset as referenced above, we generate another dataset
         \label{fig:ts-examples}
     \end{center}
     \end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/13269_shaded_cropped.pdf}
+    \caption[Inpaintings from our model and ProPainter on the task introduced in \Cref{fig:semantics} from our Traffic-Scenes dataset.]{Inpaintings from our model and ProPainter on the task introduced in \Cref{fig:semantics} from our Traffic-Scenes dataset. Our model can inpaint a realistic trajectory for the occluded vehicle. Competing flow-based approaches correctly inpaint the background but are unable to account for the vehicle.}
+    \label{fig:traffic-scenes}
+\end{figure}
 \section{Baselines and Metrics} 
 We compare our method with four recently proposed video inpainting methods that achieve state-of-the-art performance on standard benchmarks: ProPainter \citep{propainter}, E$^2$FGVI \citep{endtoend}, FGT \citep{fgt}, and FGVC \citep{flowedgeguided}. For each model, we use pre-trained checkpoints made available by the respective authors. We adopt the evaluation suite of DEVIL \citep{devil}, which includes a comprehensive selection of commonly used metrics targeting three different aspects of inpainting quality:
 \begin{itemize}
@@ -65,36 +60,57 @@ We compare our method with four recently proposed video inpainting methods that 
     \item Temporal consistency: Flow warping error ($E_\text{warp}$) \citep{ewarp}, which measures how well an inpainting follows the optical flow as calculated on the ground truth. 
 \end{itemize} 
 For our method, we train one model on each dataset with $K=16$. Models are trained on 4$\times$ NVIDIA A100 GPUs for 1-4 weeks. A detailed accounting of each model's hyperparameters and training procedure can be found in the appendix.
+
+\begin{figure}
+    \begin{center}
+        \centering
+        \captionsetup{type=figure}
+        \includegraphics[width=\linewidth]{figures/updated-cars.pdf}
+        \caption[Inpaintings from our model on the Inpainting-Cars dataset.]{Inpaintings from our model on the Inpainting-Cars dataset. The first row is the masked input to the model, the lower two rows are two separate inpaintings sampled from our model.}
+        \label{fig:cars}
+    \end{center}%
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/bg_3119.pdf}
+    \caption[A comparison of inpaintings from our method and FGT on a video from our Inpainting-Background dataset.]{Inpainted videos from our Inpainting-Background dataset. Results from our method are displayed on the top row; results from the best competing model FGT \citep{fgt} are on the bottom row. The ground truth region is darkened slightly to aid in visualizing the boundary between generated and ground-truth regions. Despite FGT outperforming our method on quantitative metrics, qualitative results are similar in quality.}
+    \label{fig:background}
+\end{figure}
+
 \input{src/main_results_table}
+
 \section{Quantitative Evaluation}
 We report quantitative results across four of our datasets in \Cref{table:main}. For each dataset, we report metrics for the best-performing model and sampling scheme we found for that dataset. For all metrics other than $E_\text{warp}$ our method outperforms the baselines on three out of four datasets, often by a significant margin. We suspect the discrepancy between $E_\text{warp}$ and the other metrics is because each of the competing methods predicts a completion of the optical flow field and utilizes this during the inpainting process, in a sense explicitly targeting $E_\text{warp}$. On the Infilling-Background dataset the baseline methods dominate, likely owing to this being precisely the kind of task that flow-based propagation is well-suited to; the (approximate) ground truth is visible in neighbouring frames. Infilling-Cars is omitted from this section, as we are not aware of an existing method suitable for this task. 
+
+
 \section{Qualitative Evaluation}
 \subsection{BDD-Inpainting}
-On this dataset, qualitative differences between our method and competing approaches are most evident in the presence of large masks that partially or fully occlude objects for a long period of time or the entire video. In such cases our method can retain or complete the visual appearance of occluded objects and propagate them through time in a realistic way, while such objects tend to disappear gradually with flow-based approaches (as in \Cref{fig:fig1}). Qualitative results on this dataset are heavily influenced by the sampling scheme used. As demonstrated in \Cref{sec:samplingschemes}, our ``Improved AR w/ Far Future'' sampling scheme tends to perform best, as it allows us to incorporate information from both past and future frames in the inpainting process. \hlr{\Cref{fig:bus} and \Cref{fig:taxi} show additional results on tasks from the BDD-Inpainting test set.}
-\begin{figure}[t]
-    \begin{center}
-        \centering
-        \captionsetup{type=figure}
-        \includegraphics[width=\linewidth]{figures/additional-samples/bus_all.pdf}
-        \caption[Qualitative results from our method and all competing methods on an example from the BDD-Inpainting-Blobs test set.]{Qualitative results from our method and all the competing methods we compared to quantitatively on an example from the BDD-Inpainting test set. We note that, in the presence of small masks, the qualitative differences are less pronounced between our method and the best-performing benchmarks, like since information in neighbouring frames can more easily be exploited. For our method we use the Improved AR w/ Far Future sampling scheme.}
-        \label{fig:bus}
-    \end{center}
-    \end{figure}
+On this dataset, qualitative differences between our method and competing approaches are most evident in the presence of large masks that partially or fully occlude objects for a long period of time or the entire video. In such cases our method can retain or complete the visual appearance of occluded objects and propagate them through time in a realistic way, while such objects tend to disappear gradually with flow-based approaches (as in \Cref{fig:fig1}). Qualitative results on this dataset are heavily influenced by the sampling scheme used. As demonstrated in \Cref{sec:samplingschemes}, our ``Improved AR w/ Far Future'' sampling scheme tends to perform best, as it allows us to incorporate information from both past and future frames in the inpainting process. \Cref{fig:bus} and \Cref{fig:taxi} show additional results on tasks from the BDD-Inpainting test set.
+\begin{figure}
+\begin{center}
+    \centering
+    \captionsetup{type=figure}
+    \includegraphics[width=\linewidth]{figures/additional-samples/bus_all.pdf}
+    \caption[Qualitative results from our method and all competing methods on an example from the BDD-Inpainting-Blobs test set.]{Qualitative results from our method and all the competing methods we compared to quantitatively on an example from the BDD-Inpainting test set. We note that, in the presence of small masks, the qualitative differences are less pronounced between our method and the best-performing benchmarks, like since information in neighbouring frames can more easily be exploited. For our method we use the Improved AR w/ Far Future sampling scheme.}
+    \label{fig:bus}
+\end{center}
+\end{figure}
     
     
     
-    \begin{figure}[t]
-    \begin{center}
-        \centering
-        \captionsetup{type=figure}
-        \includegraphics[width=\linewidth]{figures/additional-samples/taxi_all.pdf}
-        \caption[Qualitative results from our method and all competing methods on an example from the BDD-Inpainting test set.]{Qualitative results from our method and all the competing methods we compared to quantitatively on an example from the BDD-Inpainting test set. Again, for our method we use the Improved AR w/ Far Future sampling scheme. In this video the vehicle passing in the left-hand lane is only ever partially visible, causing other methods to produce blurry results. }
-        \label{fig:taxi}
-    \end{center}
-    \end{figure}
+\begin{figure}
+\begin{center}
+    \centering
+    \captionsetup{type=figure}
+    \includegraphics[width=\linewidth]{figures/additional-samples/taxi_all.pdf}
+    \caption[Qualitative results from our method and all competing methods on an example from the BDD-Inpainting test set.]{Qualitative results from our method and all the competing methods we compared to quantitatively on an example from the BDD-Inpainting test set. Again, for our method we use the Improved AR w/ Far Future sampling scheme. In this video the vehicle passing in the left-hand lane is only ever partially visible, causing other methods to produce blurry results. }
+    \label{fig:taxi}
+\end{center}
+\end{figure}
 
-\subsection{Traffic-Scenes} On this dataset, all competing methods tend to inpaint only the road surface; when vehicles enter the occluded region they disappear almost instantaneously. Our method shows a surprising ability to inpaint long, realistic trajectories that are consistent with the entry/exit points of vehicles into the occluded region, as well as correctly following roadways as in \Cref{fig:traffic-scenes}. \hlr{\Cref{fig:ts1} and \Cref{fig:ts2} show additional results on tasks from the Traffic-Scenes test set.}%Despite this, the vehicles themselves often lack temporal consistency, changing appearance during the time they are occluded. We also often have vehicles that disappear, likely caused by cases where \eg the exit point is not observed until late into the occlusion period and the partially inpainted trajectory is inconsistent with it. 
-\begin{figure}[t]
+\subsection{Traffic-Scenes} On this dataset, all competing methods tend to inpaint only the road surface; when vehicles enter the occluded region they disappear almost instantaneously. Our method shows a surprising ability to inpaint long, realistic trajectories that are consistent with the entry/exit points of vehicles into the occluded region, as well as correctly following roadways as in \Cref{fig:traffic-scenes}. \Cref{fig:ts1} and \Cref{fig:ts2} show additional results on tasks from the Traffic-Scenes test set.%Despite this, the vehicles themselves often lack temporal consistency, changing appearance during the time they are occluded. We also often have vehicles that disappear, likely caused by cases where \eg the exit point is not observed until late into the occlusion period and the partially inpainted trajectory is inconsistent with it. 
+\begin{figure}
 \begin{center}
     \centering
     \captionsetup{type=figure}
@@ -104,7 +120,7 @@ On this dataset, qualitative differences between our method and competing approa
 \end{center}
 \end{figure}
     
-\begin{figure}[t]
+\begin{figure}
 \begin{center}
     \centering
     \captionsetup{type=figure}
@@ -116,33 +132,25 @@ On this dataset, qualitative differences between our method and competing approa
 \subsection{Inpainting-Background}
 Qualitatively, all methods perform similarly on this dataset. Specifically, regardless of which method is used, it is difficult to tell where the masked region is without a visual aid on most inpainted videos (see \Cref{fig:background}). In some examples where the ground stays stationary for an extended period of time, our method produces artifacts that are likely to contribute to its poor performance on this dataset
 compared to the others. 
-\begin{figure*}[t]
-\begin{center}
-    \centering
-    \captionsetup{type=figure}
-    \includegraphics[width=\linewidth]{figures/updated-cars.pdf}
-    \caption[Inpaintings from our model on the Inpainting-Cars dataset.]{Inpaintings from our model on the Inpainting-Cars dataset. The first row is the masked input to the model, the lower two rows are two separate inpaintings sampled from our model.}
-    \label{fig:cars}
-\end{center}%
-\end{figure*}
+
 \subsection{Inpainting-Cars}
 Sampled inpaintings from our model on an example from the Inpainting-Cars dataset are shown in \Cref{fig:cars} and \Cref{fig:extra-cars}. Our model is capable of generating diverse, visually realistic inpaintings for a given input. We note the model's ability to use \emph{semantic} cues from the context to generate plausible visual features, such as realistic behavior of shadows and plausible turning trajectories based only on the movement of the mask.
 
-\begin{figure}[t]
+\begin{figure}
     \centering
-    \begin{subfigure}[t]{\textwidth}
+    \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/additional-samples/cars_3028.pdf}
         \label{fig:extra-cars1}
     \end{subfigure}
     ~
-    \begin{subfigure}[t]{\textwidth}
+    \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/additional-samples/cars_3067.pdf}
         \label{fig:extra-cars2}
     \end{subfigure}
     ~
-    \begin{subfigure}[t]{\textwidth}
+    \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/additional-samples/cars_3093.pdf}
         \label{fig:extra-cars3}
@@ -157,7 +165,12 @@ Sampled inpaintings from our model on an example from the Inpainting-Cars datase
 
 \subsection{Effect of Sampling Schemes}
 We compare selected sampling schemes on the Traffic-Scenes dataset in \Cref{table:samplingschemes}, before providing more thorough qualitative and quantitative comparisons in the appendix. Improved AR w/ Far Future is the best on all datasets aside from Infilling-Background in terms of video realism (VFID) and temporal consistency (warp error), demonstrating the importance of our method's ability to condition on incomplete frames. AR tends to do poorly on all metrics on both the Traffic-Scenes and BDD-Inpainting datasets. This is likely due to its inability to account for observed pixel values in frames coming after the ones being generated at each stage, causing divergence from the ground-truth and then artifacts when producing later frames conditioned on incompatible values. Hierarchy-2 does well on some metrics of reconstruction and frame-wise perceptual quality. It does less well in terms of video realism, as the inpainting of the ``keyframes'' in the first stage is done without conditioning on the known pixels of frames in their immediate vicinity, potentially leading to incompatibility with the local context.
-\begin{table}[t]
+
+To highlight the qualitative impact that different sampling schemes can have on the quality of inpainted videos, we select a video from the BDD-Inpainting test set where conditioning on the appropriate frames is crucial for our method to succeed. \Cref{fig:qual-begin} shows the beginning of this video, where a car is occluded in the right-hand lane for the first few seconds of the video (see input frames in the first row). The Autoregressive (AR) scheme (second row) shows a distinct ``pop-in'' effect, as when the initial frames were generated the model was not able to condition on future frames where the cars existence and appearance are revealed. Both Reverse-AR and AR w/ Far Future (third and fourth rows) do condition on future frames that contain the car; Reverse-AR because the model is able to propagate the car backwards through time, and AR w/ Far Future because the model conditions on frames far out into the future where the car has been revealed. \Cref{fig:qual-end} shows the end of the video, where the cars in the right-hand lane are occluded and remain occluded for the rest of the video (first row). The AR scheme keeps these cars visible, as it is able to propagate them forward through time (second row). Reverse-Autoreg (third row) fails for the same reason that Autoreg did at the beginning: when the final frames were generated, the model was not able to condition on frames where the vehicles were visible. AR w/ Far Future (fourth row) is again successful; despite the cars not becoming visble again (and thus there is no ``future'' to condition on), it is able to propagate the cars forward in time as the Autoreg scheme does. 
+
+
+
+\begin{table}
 \centering
 \caption{Effect of sampling schemes, measured on the Traffic-Scenes test set.}
 \label{table:samplingschemes}
@@ -176,7 +189,21 @@ Improved AR w/ Far Future                 & 35.29 & 0.9783 & 0.0202 & \textbf{0.
 
 \subsection{Samplers and Number of Sampling Steps}
 The use of diffusion models allows for a trade-off of computation time \vs inpainting quality through the number of steps used in the generative process. In \Cref{table:samplingsteps} we report the results of our model on the BDD-Inpainting test set with the AR sampling scheme using different samplers and numbers of sampling steps. Aligning with expectations and qualitative observations, performance on metrics degrades as the number of sampling steps decreases for LPIPS, PVCS, FID and VFID. We note, however, that performance on $E_\text{warp}$, PSNR, and SSIM improves, suggesting that these metrics may not correlate well with perceived quality, as has been previously suggested for the latter two metrics in \citet{perceptual}.
-\begin{table}[t]
+
+\begin{figure}
+    \begin{center}
+        \centering
+        \captionsetup{type=figure}
+        \includegraphics[width=\linewidth]{figures/james_quall/james_quall_beginning.pdf}
+        \caption{Qualitative results from different sampling schemes on the beginning of the video discussed in \Cref{sec:samplingschemes}}
+        \label{fig:qual-begin}
+        \includegraphics[width=\linewidth]{figures/james_quall/james_quall_end.pdf}
+        \caption{Qualitative results from different sampling schemes on the end of the video discussed in \Cref{sec:samplingschemes}}
+        \label{fig:qual-end}
+    \end{center}
+\end{figure}
+
+\begin{table}
 \centering
 \caption{Effect of diffusion samplers, using AR sampling on BDD-Inpainting.}
 \label{table:samplingsteps}
