@@ -11,13 +11,32 @@ This work takes inspiration from the recent success of diffusion models for imag
 
 
 \section{Background}
-\subsection{Conditional Diffusion Models}
-A conditional diffusion model \citep{tashiro2021csdi, ddpm, sohldickstein} is a generative model parameterized by a neural network trained to remove noise from data. The network is conditioned on $t \in \{ 1, \ldots, T\}$, an integer describing how much noise has been added to the data. Given hyperparameters $1 > \bar{\alpha}_1 > \ldots > \bar{\alpha}_T > 0$, training data is created by multiplying the original data by a factor $\sqrt{\bar{\alpha}_t}$ and then adding unit Gaussian noise $\boldsymbol{\epsilon}$ scaled to have variance $(1-\bar{\alpha}_t^2)$. The network should then map from this noisy data, the timestep $t$, and conditioning input $\mathbf{y}$, to a prediction of the added noise $\boldsymbol{\epsilon}$. It is trained with the squared error loss
+\subsection{Diffusion Models}
+A diffusion model \citep{ddpm, sohldickstein} is comprised of two stochastic processes:  a forward (diffusion) process and a reverse (generative) process. Given a data distribution $q(\bx_0)$, the forward process, defined as
 \begin{equation}
-    \mathcal{L}(\theta):=\mathbb{E}_{t, \mathbf{x}, \mathbf{y}, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, t\right)\right\|^2\right],
-    \label{eq:lsimple}
+q (\bx_{0: T})=q(\bx_0) \prod_{t=1}^T q (\bx_t | \bx_{t-1} ), \quad q (\bx_t | \bx_{t-1} )=\mathcal{N} (\bx_t ; \sqrt{\alpha_t} \bx_{t-1}, (1-\alpha_t) \mathbf{I} ),
 \end{equation}
-where $\boldsymbol{\epsilon}_\theta(\ldots)$ is the output of the network. Data $\mathbf{x}$ and $\mathbf{y}$ are sampled from the data distribution $p_\text{data}$, and the timestep $t$ is typically sampled from a pre-specified categorical distribution. Once such a ``denoising'' network has been trained, various methods exist for using it to draw approximate samples from $p_\text{data}(\mathbf{x}|\mathbf{y})$ \citep{ddpm,sohldickstein,tashiro2021csdi,song2020score,karras2022elucidating}. We use the Heun sampler proposed by \citet{karras2022elucidating}, and leave further details to the appendix.
+gradually transforms this distribution into a prior distribution $q(\bx_T)$ through additive noise. Typically the noise schedule $\{\alpha_t\}_{t=1}^T$ is chosen such that $q(\bx_T) \approx \mathcal{N}(\mathbf{0},\mathbf{I})$. The reverse process, defined as 
+\begin{equation}
+p_\theta (\bx_{0: T} )=p (\bx_T ) \prod_{t=1}^T p_\theta (\bx_{t-1} | \bx_t ), \quad p_\theta (\bx_{t-1} | \bx_t )=\mathcal{N} (\bx_{t-1} ; \boldsymbol{\mu}_\theta (\bx_t, t ), \boldsymbol{\Sigma}_\theta (\bx_t, t ) )
+\end{equation}
+where $p(\bx_T) \defeq \mathcal{N}(\mathbf{0},\mathbf{I})$, is trained to match the joint distribution of the forward process by optimizing a variational lower bound. Here we adopt the reverse process parameterizations
+\begin{equation}
+    \boldsymbol{\mu}_\theta (\bx_t, t ) \defeq \frac{1}{\sqrt{\alpha_t}}\left(\mathbf{x}_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}} \boldsymbol{\epsilon}_\theta (\mathbf{x}_t, t)\right), \quad \boldsymbol{\Sigma}_\theta (\bx_t, t ) \defeq (1-\alpha_t)\mathbf{I}
+\end{equation}
+and simplified objective
+\begin{equation}
+    \mathcal{L}_{\text {simple }}(\theta):=\mathbb{E}_{t, \mathbf{x}_0, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}_0+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, t\right)\right\|^2\right]
+    \label{eq:lsimple-ddpm}
+\end{equation}
+ of \citet{ddpm}, where $\bar{\alpha}_t:=\prod_{s=1}^t \alpha_s$, $\mathbf{x}_0 \sim q(\bx_0)$, $t \sim \text{Unif}(\{1, \ldots, T\})$,  $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{I})$, and $\boldsymbol{\epsilon}_\theta$ is a neural network trained to predict the noise $\boldsymbol{\epsilon}$ added to $\bx$ conditioned on $t$.
+\subsection{Conditional Diffusion Models}
+This framework is easily extended to conditional generation tasks where we wish to model $p(\bx_0|\by)$ for some conditioning signal $\by$, for instance the unmasked regions of an image in the case of image inpainting \citep{palette}. The reverse process is modified to condition on $\by$ in the transition densities $p_\theta(\bx_{t-1}|\bx_t, \by)$, typically by including $\by$ as an input to the neural network: $\boldsymbol{\epsilon}_\theta(\bx_t, \by, t)$. The data distribution becomes a joint distribution $q(\bx_0, \by)$, and \Cref{eq:lsimple-ddpm} is modified accordingly:		
+\begin{equation}
+    \mathcal{L}_{\text {cond }}(\theta):=\mathbb{E}_{t, \mathbf{x}_0, \mathbf{y}, \boldsymbol{\epsilon}}\left[\left\|\boldsymbol{\epsilon}-\boldsymbol{\epsilon}_\theta\left(\sqrt{\bar{\alpha}_t} \mathbf{x}_0+\sqrt{1-\bar{\alpha}_t} \boldsymbol{\epsilon}, \mathbf{y}, t\right)\right\|^2\right].
+    \label{eq:lcond}
+\end{equation}
+Once such the network has been trained, various methods exist for using it to draw approximate samples from $p(\mathbf{x}_0|\mathbf{y})$ \citep{ddpm,sohldickstein,tashiro2021csdi,song2020score,karras2022elucidating}. We use the Heun sampler proposed by \citet{karras2022elucidating}, and leave further details to the appendix.
 
 \begin{figure}[t]
     \centering

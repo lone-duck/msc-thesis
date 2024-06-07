@@ -1,4 +1,4 @@
-\chapter{Video Inpainting with Conditional Diffusion Models}
+\chapter{Method}
 \label{sec:VICDM}
 
 \begin{figure}[t]
@@ -80,10 +80,77 @@ This means that we can sample from the required approximation of $p_\text{data}(
 
 \section{Sampling Schemes}\label{sec:samplingschemes}
 The ability to condition on incomplete frames enables us to design new sampling schemes that better capture dependencies that are necessary for high-quality video inpainting. \textbf{Improved AR} is a variant of AR that takes into account information from future frames by conditioning on the observed parts of the frames immediately after the sequence of frames being generated, as well as on the frames before; see \Cref{fig:improved-ar}. \textbf{Improved AR w/ Far Future} builds on ``Improved AR'' by conditioning on the observed parts of frames far in the future instead of of frames immediately after those being sampled; see \Cref{fig:improved-ar-w-far-future}.
-\textbf{3-Resolution Improved AR} (3-Res. Improved AR) builds on ``Improved AR'' by first infilling every fifteenth frame using Improved AR, then infilling every fifth frame while conditioning on nearby infilled frames, and then infilling all other frames. We visualize a ``2-res.'' version (infilling every third frame and then every frame) in \Cref{fig:multiscale}. Visualizations of all sampling schemes considered in this work can be found in \Cref{app:sampling-schemes}.
+\textbf{3-Resolution Improved AR} (3-Res. Improved AR) builds on ``Improved AR'' by first infilling every fifteenth frame using Improved AR, then infilling every fifth frame while conditioning on nearby infilled frames, and then infilling all other frames. We visualize a ``2-res.'' version (infilling every third frame and then every frame) in \Cref{fig:multiscale}. Visualizations of all sampling schemes we consider are shown in \Cref{fig:sampling-scheme-details}. 
+
+To highlight the qualitative impact that different sampling schemes can have on the quality of inpainted videos, we select a video from the BDD-Inpainting test set where conditioning on the appropriate frames is crucial for our method to succeed. \Cref{fig:qual-begin} shows the beginning of this video, where a car is occluded in the right-hand lane for the first few seconds of the video (see input frames in the first row). The Autoregressive (AR) scheme (second row) shows a distinct ``pop-in'' effect, as when the initial frames were generated the model was not able to condition on future frames where the cars existence and appearance are revealed. Both Reverse-AR and AR w/ Far Future (third and fourth rows) do condition on future frames that contain the car; Reverse-AR because the model is able to propagate the car backwards through time, and AR w/ Far Future because the model conditions on frames far out into the future where the car has been revealed. \Cref{fig:qual-end} shows the end of the video, where the cars in the right-hand lane are occluded and remain occluded for the rest of the video (first row). The AR scheme keeps these cars visible, as it is able to propagate them forward through time (second row). Reverse-Autoreg (third row) fails for the same reason that Autoreg did at the beginning: when the final frames were generated, the model was not able to condition on frames where the vehicles were visible. AR w/ Far Future (fourth row) is again successful; despite the cars not becoming visble again (and thus there is no ``future'' to condition on), it is able to propagate the cars forward in time as the Autoreg scheme does. 
+
+\begin{figure}[t!]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/autoreg.png}
+        \caption{AR.}
+        \label{fig:ar-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/reverse-autoreg.png}
+        \caption{Reverse AR.}
+        \label{fig:reverse-ar-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/hierarchy-2.png}
+        \caption{Hierarchy-2.}
+        \label{fig:h2-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/autoregressive-with-near-future.png}
+        \caption{Improved AR.}
+        \label{fig:improved-ar-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/autoregressive-multires-10-1.png}
+        \caption{2-Res Improved AR.}
+        \label{fig:2res-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/autoregressive-multires-15-5-1.png}
+        \caption{3-Res Improved AR.}
+        \label{fig:3res-app}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/big-sampling-scheme-visualizations/autoregressive-with-future.png}
+        \caption{Improved AR with Far Future.}
+    \end{subfigure}
+    \caption[A visualization of all sampling schemes.]{Sampling schemes visualizations similar to \Cref{fig:old-sampling-schemes}, but with a model capable of attending to 16 frames at a time as in our experiments, and a more typical video length of 200.
+    }
+    \label{fig:sampling-scheme-details}
+\end{figure}
 
 
-
+\begin{figure*}[h!]
+\begin{center}
+    \centering
+    \captionsetup{type=figure}
+    \includegraphics[width=\linewidth]{figures/james_quall/james_quall_beginning.pdf}
+    \caption{Qualitative results from different sampling schemes on the beginning of the video discussed in \Cref{sec:samplingschemes}}
+    \label{fig:qual-begin}
+    \includegraphics[width=\linewidth]{figures/james_quall/james_quall_end.pdf}
+    \caption{Qualitative results from different sampling schemes on the end of the video discussed in \Cref{sec:samplingschemes}}
+    \label{fig:qual-end}
+\end{center}
+\end{figure*}
 
 \begin{comment}
 \begin{minipage}{0.46\textwidth}
