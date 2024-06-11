@@ -85,7 +85,7 @@ Once a network is trained to make predictions for arbitrary indices $\mathcal{X}
         \caption{Hierarchy-2}
         \label{fig:h2}
     \end{subfigure}
-    \caption[A visualization of sampling schemes introduced in prior work.]{A visualization of sampling schemes (introduced in \citet{fdm}) for generating videos of length $N=31$ while accessing only $K=8$ frames at a time. Each row of each subfigure depicts a different stage of our sampling process, starting from the top row and working down. Each column represents one video frame. Within each stage, frames shown in \textcolor{latentcolor}{cyan} are being sampled conditioned on the values of previously-sampled frames shown in \textcolor{observedpastcolor}{dark red}. Frames shown in white are not yet generated. By the end, all frames are generated and shown in \textcolor{completecolor}{light gray}.
+    \caption[A visualization of sampling schemes introduced in prior work.]{A visualization of sampling schemes (introduced in \citet{fdm}) for generating videos of length $N=31$ while accessing only $K=8$ frames at a time. Each row of each subfigure depicts a different stage of our sampling process, starting from the top row and working down. Each column represents one video frame. Within each stage, frames shown in cyan are being sampled conditioned on the values of previously-sampled frames shown in dark red. Frames shown in white are not yet generated. By the end, all frames are generated and shown in light gray.
     }
     \label{fig:old-sampling-schemes}
 \end{figure}
